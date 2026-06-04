@@ -10,9 +10,9 @@ import {
   TrashIcon,
   ChevronUpIcon,
   ChevronDownIcon,
-  BuildingLibraryIcon,
-  XMarkIcon,
   CheckIcon,
+  MarsStrokeIcon,
+  Building,
 } from 'lucide-react';
 
 type CatalogBank = {
@@ -67,7 +67,7 @@ function BankModal({
             onClick={onClose}
             className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
           >
-            <XMarkIcon className="h-5 w-5" />
+            <MarsStrokeIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -255,7 +255,7 @@ export default function CatalogBanksPage() {
         </div>
       ) : sorted.length === 0 ? (
         <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 text-slate-400 dark:border-slate-700">
-          <BuildingLibraryIcon className="h-8 w-8" />
+          <Building className="h-8 w-8" />
           <p className="text-sm">No banks yet. Add one to get started.</p>
         </div>
       ) : (
