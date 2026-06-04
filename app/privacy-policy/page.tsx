@@ -36,7 +36,7 @@ export default function PrivacyPolicy() {
             <ul className="mt-2 list-inside list-disc space-y-1 text-slate-600 dark:text-slate-300">
               <li>Personal identification information (name, email address, phone number)</li>
               <li>Financial information for investment purposes (bank account details, transaction history)</li>
-              <li>Government-issued ID for KYC verification</li>
+              {/* <li>Government-issued ID for KYC verification</li> */}
               <li>Transaction history and wallet activity</li>
               <li>Device and usage data through cookies and similar technologies</li>
               <li>Communication preferences and support inquiries</li>
@@ -126,8 +126,8 @@ export default function PrivacyPolicy() {
               If you have questions about this Privacy Policy, please contact us:
             </p>
             <ul className="mt-2 list-inside list-disc space-y-1 text-slate-600 dark:text-slate-300">
-              <li>Email: privacy@i-invest.com</li>
-              <li>Phone: +1 (234) 567-8900</li>
+              <li>Email:tweacktech@gmail.com</li>
+              {/* <li>Phone: +1 (234) 567-8900</li> */}
               <li>Address: 123 Investment Street, Financial District, NY 10001</li>
             </ul>
           </section>

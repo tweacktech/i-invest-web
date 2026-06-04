@@ -160,8 +160,8 @@ export default function CookiePolicy() {
               If you have questions about our use of cookies, please contact:
             </p>
             <ul className="mt-2 list-inside list-disc space-y-1 text-slate-600 dark:text-slate-300">
-              <li>Email: privacy@i-invest.com</li>
-              <li>Data Protection Officer: dpo@i-invest.com</li>
+              <li>Email: tweacktech@gmail.com</li>
+              <li>Data Protection Officer:tweacktech@gmail.com</li>
             </ul>
           </section>
 

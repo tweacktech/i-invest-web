@@ -157,8 +157,8 @@ export default function TermsOfService() {
               For questions about these Terms, contact us at:
             </p>
             <ul className="mt-2 list-inside list-disc space-y-1 text-slate-600 dark:text-slate-300">
-              <li>Email: legal@i-invest.com</li>
-              <li>Support: support@i-invest.com</li>
+              <li>Email: tweacktech@gmail.com</li>
+              <li>Support: tweacktech@gmail.com</li>
             </ul>
           </section>
 

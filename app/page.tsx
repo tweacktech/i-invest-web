@@ -353,7 +353,7 @@ export default function Home() {
               </div>
               <p className="text-sm font-semibold">Email</p>
               <a href="mailto:support@i-invest.com" className="text-sm text-slate-600 hover:text-emerald-500 dark:text-slate-400">
-                support@i-invest.com
+              tweacktech@gmail.com
               </a>
             </div>
             <div className="text-center">
