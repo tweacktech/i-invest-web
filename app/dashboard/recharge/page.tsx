@@ -162,6 +162,7 @@ export default function RechargePage() {
       {/* Gateway / Deposit method selector */}
       {mode === 'instant' ? (
         <></>
+        
         // <div className="mt-6 max-w-xs">
         //   <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Gateway</p>
         //   <div className="mt-2 space-y-2">
