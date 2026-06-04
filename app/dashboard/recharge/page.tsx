@@ -161,31 +161,32 @@ export default function RechargePage() {
 
       {/* Gateway / Deposit method selector */}
       {mode === 'instant' ? (
-        <div className="mt-6 max-w-xs">
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Gateway</p>
-          <div className="mt-2 space-y-2">
-            {(
-              [
-                ['GATEWAY_A', 'Gateway A'],
-                // ['GATEWAY_B', 'Gateway B'],
-                // ['GATEWAY_D', 'Gateway D'],
-              ] as const
-            ).map(([value, label]) => (
-              <label
-                key={value}
-                className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900"
-              >
-                <input
-                  type="radio"
-                  name="gw"
-                  checked={gateway === value}
-                  onChange={() => setGateway(value)}
-                />
-                <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
+        <></>
+        // <div className="mt-6 max-w-xs">
+        //   <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Gateway</p>
+        //   <div className="mt-2 space-y-2">
+        //     {(
+        //       [
+        //         ['GATEWAY_A', 'Gateway A'],
+        //         // ['GATEWAY_B', 'Gateway B'],
+        //         // ['GATEWAY_D', 'Gateway D'],
+        //       ] as const
+        //     ).map(([value, label]) => (
+        //       <label
+        //         key={value}
+        //         className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900"
+        //       >
+        //         <input
+        //           type="radio"
+        //           name="gw"
+        //           checked={gateway === value}
+        //           onChange={() => setGateway(value)}
+        //         />
+        //         <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</span>
+        //       </label>
+        //     ))}
+        //   </div>
+        // </div>
       ) : (
         <div className="mt-6">
           <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Transfer account</p>
