@@ -149,6 +149,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md animate-[fadeInUp_0.7s_ease]">
           {/* Mobile Logo */}
           <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
+          <Link href='/'>
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-xl font-black text-white shadow-lg">
               I
             </div>
@@ -162,6 +163,7 @@ export default function LoginPage() {
                 Smart Investment Platform
               </p>
             </div>
+            </Link>
           </div>
 
           {/* Card */}
