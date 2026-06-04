@@ -175,7 +175,7 @@ export function RegisterForm() {
           {/* Card */}
           <div className="rounded-[32px] border border-slate-200 bg-white/70 p-8 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/70">
             <div className="text-center">
-              <h1 className="text-4xl font-black">
+              <h1 className="text-3xl font-black">
                 Create Account
               </h1>
 
