@@ -228,7 +228,7 @@ export default function CatalogBanksPage() {
       <div className="mb-8 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100">
-            <BuildingLibraryIcon className="h-5 w-5 text-white dark:text-slate-900" />
+            <Building className="h-5 w-5 text-white dark:text-slate-900" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Bank Catalog</h1>
