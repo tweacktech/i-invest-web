@@ -148,8 +148,9 @@ export default function LoginPage() {
       <section className="flex w-full items-center justify-center px-6 py-10 lg:w-1/2">
         <div className="w-full max-w-md animate-[fadeInUp_0.7s_ease]">
           {/* Mobile Logo */}
-          <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
           <Link href='/'>
+          <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
+          
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-xl font-black text-white shadow-lg">
               I
             </div>
@@ -163,8 +164,9 @@ export default function LoginPage() {
                 Smart Investment Platform
               </p>
             </div>
-            </Link>
+            
           </div>
+          </Link>
 
           {/* Card */}
           <div className="rounded-[32px] border border-slate-200 bg-white/70 p-8 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/70">
