@@ -12,6 +12,7 @@ const nav = [
   { href: '/staff/recharges', label: 'Recharges', icon: '💳' },
   { href: '/staff/withdrawals', label: 'Withdrawals', icon: '🏦' },
   { href: '/staff/manage/banks', label: 'Banks', icon: '🏛️' },
+  { href: '/staff/manage/deposit-methods', label: 'Deposit Banks', icon: '🏛️' },
   { href: '/staff/manage/vip', label: 'VIP levels', icon: '👑' },
   { href: '/staff/manage/package', label: 'Packages', icon: '📦' },
   { href: '/staff/manage/task', label: 'Daily tasks', icon: '✨' },
