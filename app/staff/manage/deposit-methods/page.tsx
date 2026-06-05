@@ -10,9 +10,8 @@ import {
   TrashIcon,
   ChevronUpIcon,
   ChevronDownIcon,
-
   CheckIcon,
-  MarsStrokeIcon,
+  XIcon,
   BanknoteIcon,
 } from 'lucide-react';
 
@@ -49,7 +48,6 @@ const EMPTY_FORM: FormState = {
   sortOrder: 0,
 };
 
-// ── Reusable field ─────────────────────────────────────────────────────────────
 function Field({
   label,
   required,
@@ -69,8 +67,37 @@ function Field({
   );
 }
 
-const inputCls =
-  'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-blue-900';
+const inputCls ='w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-blue-900';
+
+// ── Toggle Switch ─────────────────────────────────────────────────────────────
+function Toggle({
+  enabled,
+  onChange,
+  disabled,
+}: {
+  enabled: boolean;
+  onChange: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
+      disabled={disabled}
+      onClick={onChange}
+      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
+        enabled ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
+      }`}
+    >
+      <span
+        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+          enabled ? 'translate-x-5' : 'translate-x-0'
+        }`}
+      />
+    </button>
+  );
+}
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
 function MethodModal({
@@ -108,7 +135,7 @@ function MethodModal({
             onClick={onClose}
             className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
           >
-            <MarsStrokeIcon className="h-5 w-5" />
+            <XIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -172,24 +199,15 @@ function MethodModal({
               />
             </Field>
             <Field label="Status">
-              <button
-                type="button"
-                onClick={() => set('isEnabled', !form.isEnabled)}
-                className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
-                  form.isEnabled
-                    ? 'border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950/40 dark:text-green-300'
-                    : 'border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-800'
-                }`}
-              >
-                <div
-                  className={`relative h-5 w-9 rounded-full transition-colors ${form.isEnabled ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`}
-                >
-                  <span
-                    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${form.isEnabled ? 'translate-x-4' : 'translate-x-0.5'}`}
-                  />
-                </div>
-                {form.isEnabled ? 'Enabled' : 'Disabled'}
-              </button>
+              <div className="flex h-[42px] items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 dark:border-slate-700 dark:bg-slate-800">
+                <Toggle
+                  enabled={form.isEnabled}
+                  onChange={() => set('isEnabled', !form.isEnabled)}
+                />
+                <span className={`text-sm font-medium ${form.isEnabled ? 'text-green-700 dark:text-green-400' : 'text-slate-500'}`}>
+                  {form.isEnabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
             </Field>
           </div>
         </div>
@@ -226,13 +244,15 @@ function MethodModal({
 export default function DepositMethodsPage() {
   const qc = useQueryClient();
   const [modal, setModal] = useState<FormState | null>(null);
+  // Optimistic toggle state: track which ids are mid-flight
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
 
   const methods = useQuery({
-    queryKey: ['deposit-methods-admin'],
+    queryKey: ['deposit-methods'],
     queryFn: async () => (await adminApi.get<DepositMethod[]>('/staff/deposit-methods')).data,
   });
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ['deposit-methods-admin'] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ['deposit-methods'] });
 
   const save = useMutation({
     mutationFn: async (data: FormState) => {
@@ -254,9 +274,25 @@ export default function DepositMethodsPage() {
   });
 
   const toggle = useMutation({
-    mutationFn: (id: string) => adminApi.patch(`/staff/deposit-methods/${id}/toggle`),
-    onSuccess: invalidate,
-    onError: toastApiError,
+    mutationFn: async (id: string) => {
+      setTogglingIds((s) => new Set(s).add(id));
+      // Optimistic update in cache
+      qc.setQueryData<DepositMethod[]>(['deposit-methods'], (old) =>
+        old?.map((m) => (m.id === id ? { ...m, isEnabled: !m.isEnabled } : m)),
+      );
+      return adminApi.patch(`/staff/deposit-methods/${id}/toggle`);
+    },
+    onSettled: (_, __, id) => {
+      setTogglingIds((s) => { const n = new Set(s); n.delete(id); return n; });
+      invalidate(); // sync with server truth
+    },
+    onError: (err, id) => {
+      // Roll back optimistic update on error
+      qc.setQueryData<DepositMethod[]>(['deposit-methods'], (old) =>
+        old?.map((m) => (m.id === id ? { ...m, isEnabled: !m.isEnabled } : m)),
+      );
+      toastApiError(err);
+    },
   });
 
   const remove = useMutation({
@@ -317,25 +353,25 @@ export default function DepositMethodsPage() {
         </div>
       ) : sorted.length === 0 ? (
         <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 text-slate-400 dark:border-slate-700">
-          <BanknotesIcon className="h-8 w-8" />
+          <BanknoteIcon className="h-8 w-8" />
           <p className="text-sm">No deposit methods yet.</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
           {/* Header row */}
-          <div className="grid grid-cols-[2rem_1fr_1fr_1fr_6rem_7rem] gap-4 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800/50">
+          <div className="grid grid-cols-[2rem_1fr_1fr_1fr_7rem_7rem] gap-4 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800/50">
             <span>#</span>
             <span>Label / Code</span>
             <span>Bank</span>
             <span>Account</span>
-            <span className="text-center">Status</span>
+            <span className="text-center">Enabled</span>
             <span className="text-right">Actions</span>
           </div>
 
           {sorted.map((m, idx) => (
             <div
               key={m.id}
-              className={`grid grid-cols-[2rem_1fr_1fr_1fr_6rem_7rem] items-center gap-4 px-4 py-4 text-sm transition-colors ${
+              className={`grid grid-cols-[2rem_1fr_1fr_1fr_7rem_7rem] items-center gap-4 px-4 py-4 text-sm transition-colors ${
                 idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-800/30'
               }`}
             >
@@ -368,32 +404,25 @@ export default function DepositMethodsPage() {
                 </span>
               </div>
 
-              {/* Bank name */}
+              {/* Bank */}
               <p className="text-slate-700 dark:text-slate-300">{m.bankName}</p>
 
-              {/* Account details */}
+              {/* Account */}
               <div>
                 <p className="text-slate-800 dark:text-slate-200">{m.accountName}</p>
                 <p className="font-mono text-xs text-slate-500 dark:text-slate-400">{m.accountNumber}</p>
               </div>
 
               {/* Toggle */}
-              <div className="flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => toggle.mutate(m.id)}
-                  disabled={toggle.isPending}
-                  title={m.isEnabled ? 'Disable' : 'Enable'}
-                  className={`relative h-5 w-9 rounded-full transition-colors ${
-                    m.isEnabled ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                      m.isEnabled ? 'translate-x-4' : 'translate-x-0.5'
-                    }`}
-                  />
-                </button>
+              <div className="flex flex-col items-center gap-1">
+                <Toggle
+                  enabled={m.isEnabled}
+                  onChange={() => toggle.mutate(m.id)}
+                  disabled={togglingIds.has(m.id)}
+                />
+                <span className={`text-xs font-medium ${m.isEnabled ? 'text-green-600 dark:text-green-400' : 'text-slate-400'}`}>
+                  {m.isEnabled ? 'On' : 'Off'}
+                </span>
               </div>
 
               {/* Actions */}
@@ -423,7 +452,8 @@ export default function DepositMethodsPage() {
                       remove.mutate(m.id);
                     }
                   }}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                  disabled={remove.isPending}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>
