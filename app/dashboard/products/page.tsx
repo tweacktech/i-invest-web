@@ -216,7 +216,7 @@ export default function ProductsPage() {
                   onClick={() => buy.mutate({ packageId: p.id })}
                   className="flex items-center gap-1 sm:gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-lg transition hover:scale-[1.03] disabled:opacity-50"
                 >
-                  {buy.isPending ? '...' : 'Invest'}
+                  {buy.isPending ? '...' : 'Purchase'}
                   {!buy.isPending && (
                     <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4" />
                   )}
