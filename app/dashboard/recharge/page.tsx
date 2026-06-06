@@ -9,7 +9,7 @@ import { toast, toastApiError } from '@/lib/toast';
 import Link from 'next/link';
 import { HistoryIcon } from 'lucide-react';
 
-const PRESETS = [3000, 6000, 12000, 25000, 60000, 100_000];
+const PRESETS = [6000, 15000, 51000, 120_0000, 305_000];
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/v1';
 
@@ -34,7 +34,7 @@ type RechargeRow = {
 
 export default function RechargePage() {
   const router = useRouter();
-  const [amount, setAmount] = useState('3000');
+  const [amount, setAmount] = useState('6000');
   const [mode, setMode] = useState<'instant' | 'transfer'>('transfer');
   const [gateway, setGateway] = useState<'PAYSTACK' | 'BANK_TRANSFER'>('BANK_TRANSFER');
   // const [gateway, setGateway] = useState<'PAYSTACK' | 'BANK_TRANSFER'>('PAYSTACK');

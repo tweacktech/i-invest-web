@@ -62,7 +62,7 @@ export default function TeamPage() {
       <div>
         <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100">My team</h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Earn commissions when your network invests — Level 1: 20%, Level 2: 3%, Level 3: 2%.
+          Earn commissions when your network invests — Level 1: 3%, Level 2: 2.5%, Level 3: 2%.
         </p>
       </div>
 
@@ -74,8 +74,8 @@ export default function TeamPage() {
         <>
           <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="Total team" value={String(s.teamCounts.total)} />
-            <StatCard label="Level 1" value={String(s.teamCounts.level1)} sub="20% commission" />
-            <StatCard label="Level 2" value={String(s.teamCounts.level2)} sub="3% commission" />
+            <StatCard label="Level 1" value={String(s.teamCounts.level1)} sub="3% commission" />
+            <StatCard label="Level 2" value={String(s.teamCounts.level2)} sub="2.5% commission" />
             <StatCard label="Level 3" value={String(s.teamCounts.level3)} sub="2% commission" />
           </section>
 
