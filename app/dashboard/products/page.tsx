@@ -115,7 +115,7 @@ export default function ProductsPage() {
           </h1>
   
           <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Choose a plan and grow your capital securely.
+            Choose a Package and grow your wealth securely.
           </p>
         </div>
       </div>

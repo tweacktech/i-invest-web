@@ -233,7 +233,7 @@ export default function RechargePage() {
       <div className="mt-10 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-xs text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
         <p className="font-semibold">Recharge instructions</p>
         <ol className="mt-2 list-decimal space-y-1 pl-4">
-          <li>Minimum recharge is ₦3,000.</li>
+          <li>Minimum recharge is ₦6,000.</li>
           <li>For bank transfer, send the exact amount and include the narration we give you.</li>
           <li>After Admin confirms your payment, your balance will be updated.</li>
           <li>Unpaid transfer orders expire when the countdown reaches zero.</li>

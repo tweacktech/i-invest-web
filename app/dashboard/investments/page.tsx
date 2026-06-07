@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { useMoney } from '@/lib/currency';
+import { WelfareBanner } from '@/components/dashboard/WelfareBanner';
 
 export default function InvestmentsPage() {
   const [activeTab, setActiveTab] = useState<'active' | 'matured'>('active');
@@ -32,6 +33,7 @@ export default function InvestmentsPage() {
 
   return (
     <div className="p-6 lg:p-10">
+       <WelfareBanner />
       <h1 className="text-2xl font-bold text-slate-900">My investments</h1>
       
       {/* Stats Card */}

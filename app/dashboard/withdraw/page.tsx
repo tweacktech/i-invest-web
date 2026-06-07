@@ -4,10 +4,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api-client';
-import { HistoryIcon } from 'lucide-react'; // Using lucide-react for icons
+import { HistoryIcon } from 'lucide-react';
 import { useMoney } from '@/lib/currency';
+import { toast } from 'sonner';
 
 const PRESETS = [3000, 6000, 12000, 25000, 60000, 100000];
+const WITHDRAWAL_FEE_PERCENTAGE = 10; // 10% fee
 
 export default function WithdrawPage() {
   const [amount, setAmount] = useState('');
@@ -26,14 +28,28 @@ export default function WithdrawPage() {
     queryFn: async () => (await api.get('/withdrawals/limits')).data,
   });
 
+  const { format } = useMoney();
+
+  // Calculate fee and net amount
+  const calculateFee = (amountValue: number) => {
+    const fee = (amountValue * WITHDRAWAL_FEE_PERCENTAGE) / 100;
+    return Math.round(fee); // Round to nearest whole number
+  };
+
+  const calculateNetAmount = (amountValue: number) => {
+    return amountValue - calculateFee(amountValue);
+  };
+
+  const numericAmount = parseFloat(amount);
+  const withdrawalFee = !isNaN(numericAmount) ? calculateFee(numericAmount) : 0;
+  const netAmount = !isNaN(numericAmount) ? calculateNetAmount(numericAmount) : 0;
+
   // Check if current time is within withdrawal hours (10 AM to 5 PM)
   const isWithinWithdrawalHours = () => {
     const now = new Date();
     const hours = now.getHours();
     return hours >= 10 && hours < 24; // 10 AM to 5 PM
   };
-
-  const { format } = useMoney();
 
   useEffect(() => {
     if (!isWithinWithdrawalHours()) {
@@ -57,14 +73,39 @@ export default function WithdrawPage() {
       });
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Show success toast with fee details
+      toast.success('Withdrawal request submitted successfully!', {
+        description: `₦${numericAmount.toLocaleString()} requested - Fee: ₦${withdrawalFee.toLocaleString()} (10%) | Net: ₦${netAmount.toLocaleString()}`,
+        duration: 6000,
+        position: 'top-right',
+      });
+
+      // Invalidate queries to refresh data
       qc.invalidateQueries({ queryKey: ['withdrawals'] });
       qc.invalidateQueries({ queryKey: ['settings-profile'] });
+      
+      // Reset form
       setAmount('');
       setPin('');
       setTimeError('');
+      
+      setTimeout(() => {
+        toast.info('You will be notified once your withdrawal is approved', {
+          duration: 4000,
+          position: 'top-right',
+        });
+      }, 1000);
     },
     onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || error.message || 'Withdrawal failed';
+      
+      toast.error('Withdrawal failed', {
+        description: errorMessage,
+        duration: 5000,
+        position: 'top-right',
+      });
+      
       if (error.response?.data?.message) {
         setTimeError(error.response.data.message);
       } else if (error.message) {
@@ -77,8 +118,11 @@ export default function WithdrawPage() {
   const hasPin = profile.data?.hasWithdrawalPin;
   const isWithdrawalTime = isWithinWithdrawalHours();
   const canWithdraw = limits.data?.canWithdraw !== false;
+  
+  // Check minimum withdrawal amount (₦3000)
+  const isBelowMinimum = numericAmount > 0 && numericAmount < 3000;
   const isSubmitDisabled =
-    submit.isPending || !hasPin || !bankId || !amount || !pin || !isWithdrawalTime || !canWithdraw;
+    submit.isPending || !hasPin || !bankId || !amount || !pin || !isWithdrawalTime || !canWithdraw || isBelowMinimum;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:p-10">
@@ -109,30 +153,19 @@ export default function WithdrawPage() {
         </div>
       )}
 
-{limits.data && (
-  limits.data.vipTier >= 1 ? (
-    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
-      <p>
-        VIP {limits.data.vipTier}: withdraw up to{' '}
-        <strong>{limits.data.maxWithdrawalPercent}%</strong> of available balance
-         {/* (
-        {format(limits.data.maxWithdrawalAmount)} max). */}
-      </p>
-      {limits.data.requiresActiveInvestment && !limits.data.hasActiveInvestment ? (
-        <p className="mt-2 text-amber-800 dark:text-amber-300">
-          You need an active investment before you can withdraw.
-        </p>
+      {limits.data && limits.data.vipTier >= 1 ? (
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
+          <p>
+            VIP {limits.data.vipTier}: withdraw up to{' '}
+            <strong>{limits.data.maxWithdrawalPercent}%</strong> of available balance
+          </p>
+          {limits.data.requiresActiveInvestment && !limits.data.hasActiveInvestment ? (
+            <p className="mt-2 text-amber-800 dark:text-amber-300">
+              You need an active investment before you can withdraw.
+            </p>
+          ) : null}
+        </div>
       ) : null}
-    </div>
-  ) : (
-    <></>
-    // <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-    //   <p>
-    //     {/* 💡 Upgrade to VIP 1 or higher to unlock withdrawal benefits and higher limits. */}
-    //   </p>
-    // </div>
-  )
-)}
 
       {timeError && (
         <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/30 dark:text-red-100">
@@ -140,13 +173,15 @@ export default function WithdrawPage() {
         </div>
       )}
 
-      {/* Withdrawal Hours Info */}
-      {/* <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs text-blue-900 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-100">
-        <p className="font-semibold">⏰ Withdrawal Hours: 10:00 AM - 5:00 PM</p>
-        <p className="mt-1">Withdrawals are only processed during business hours.</p>
-      </div> */}
+      {/* Withdrawal Fee Info Banner */}
+      <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+        <p className="font-semibold">💰 Withdrawal Fee: 10%</p>
+        <p className="mt-1 text-xs">
+          A 10% processing fee applies to all withdrawals. For example, withdrawing ₦10,000 will incur a ₦1,000 fee.
+        </p>
+      </div>
 
-      {/* Amount Selection Section - Only presets, no custom input */}
+      {/* Amount Selection Section */}
       <div className="mt-8">
         <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Select amount</p>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -170,7 +205,38 @@ export default function WithdrawPage() {
         </p>
       </div>
 
-      {/* Bank Account Selection - Dropdown */}
+      {/* Fee Breakdown Section */}
+      {amount && numericAmount >= 3000 && (
+        <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900 dark:bg-blue-950/20">
+          <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">Fee Breakdown:</p>
+          <div className="mt-2 space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-slate-600 dark:text-slate-400">Withdrawal Amount:</span>
+              <span className="font-medium text-slate-900 dark:text-slate-100">{format(numericAmount)}</span>
+            </div>
+            <div className="flex justify-between text-amber-700 dark:text-amber-300">
+              <span>Withdrawal Fee (10%):</span>
+              <span>- {format(withdrawalFee)}</span>
+            </div>
+            <div className="flex justify-between border-t border-blue-200 pt-2 font-semibold dark:border-blue-800">
+              <span>Net Amount:</span>
+              <span className="text-green-700 dark:text-green-400">{format(netAmount)}</span>
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+            You will receive ₦{netAmount.toLocaleString()} after fee deduction
+          </p>
+        </div>
+      )}
+
+      {/* Minimum amount warning */}
+      {amount && numericAmount > 0 && numericAmount < 3000 && (
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/30 dark:text-red-100">
+          ⚠️ Minimum withdrawal amount is ₦3,000
+        </div>
+      )}
+
+      {/* Bank Account Selection */}
       <div className="mt-8">
         <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Bank account</label>
         <select
@@ -212,7 +278,7 @@ export default function WithdrawPage() {
         onClick={() => submit.mutate()}
         className="mt-8 w-full rounded-xl bg-slate-800 py-4 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
       >
-        {submit.isPending ? 'Processing…' : 'Submit withdrawal'}
+        {submit.isPending ? 'Processing…' : `Withdraw ${amount ? format(numericAmount) : ''}`}
       </button>
 
       {/* Withdrawal Instructions */}
@@ -221,6 +287,7 @@ export default function WithdrawPage() {
         <ol className="mt-2 list-decimal space-y-1 pl-4">
           <li>Withdrawals are only allowed between 10:00 AM and 5:00 PM.</li>
           <li>Minimum withdrawal is ₦3,000.</li>
+          <li>A 10% processing fee applies to all withdrawals.</li>
           <li>Funds are reserved instantly and reviewed by an admin.</li>
           <li>Processing typically takes 24-48 hours.</li>
           <li>You'll receive a notification when your withdrawal is approved or rejected.</li>
