@@ -9,7 +9,7 @@ import { useMoney } from '@/lib/currency';
 import { toast } from 'sonner';
 
 const PRESETS = [3000, 6000, 12000, 25000, 60000, 100000];
-const WITHDRAWAL_FEE_PERCENTAGE = 10; // 10% fee
+const WITHDRAWAL_FEE_PERCENTAGE = 9.2; // 9.2% fee
 
 export default function WithdrawPage() {
   const [amount, setAmount] = useState('');
@@ -76,7 +76,7 @@ export default function WithdrawPage() {
     onSuccess: (data) => {
       // Show success toast with fee details
       toast.success('Withdrawal request submitted successfully!', {
-        description: `₦${numericAmount.toLocaleString()} requested - Fee: ₦${withdrawalFee.toLocaleString()} (10%) | Net: ₦${netAmount.toLocaleString()}`,
+        description: `₦${numericAmount.toLocaleString()} requested - Fee: ₦${withdrawalFee.toLocaleString()} (9.2%) | Net: ₦${netAmount.toLocaleString()}`,
         duration: 6000,
         position: 'top-right',
       });
@@ -174,12 +174,12 @@ export default function WithdrawPage() {
       )}
 
       {/* Withdrawal Fee Info Banner */}
-      <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
-        <p className="font-semibold">💰 Withdrawal Fee: 10%</p>
+      {/* <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+        <p className="font-semibold">💰 Withdrawal Fee: 9.2%</p>
         <p className="mt-1 text-xs">
-          A 10% processing fee applies to all withdrawals. For example, withdrawing ₦10,000 will incur a ₦1,000 fee.
+          A 9.2% processing fee applies to all withdrawals. For example, withdrawing ₦10,000 will incur a ₦1,000 fee.
         </p>
-      </div>
+      </div> */}
 
       {/* Amount Selection Section */}
       <div className="mt-8">
@@ -215,7 +215,7 @@ export default function WithdrawPage() {
               <span className="font-medium text-slate-900 dark:text-slate-100">{format(numericAmount)}</span>
             </div>
             <div className="flex justify-between text-amber-700 dark:text-amber-300">
-              <span>Withdrawal Fee (10%):</span>
+              <span>Withdrawal Fee (9.2%):</span>
               <span>- {format(withdrawalFee)}</span>
             </div>
             <div className="flex justify-between border-t border-blue-200 pt-2 font-semibold dark:border-blue-800">
@@ -287,7 +287,7 @@ export default function WithdrawPage() {
         <ol className="mt-2 list-decimal space-y-1 pl-4">
           <li>Withdrawals are only allowed between 10:00 AM and 5:00 PM.</li>
           <li>Minimum withdrawal is ₦3,000.</li>
-          <li>A 10% processing fee applies to all withdrawals.</li>
+          <li>A 9.2% processing fee applies to all withdrawals.</li>
           <li>Funds are reserved instantly and reviewed by an admin.</li>
           <li>Processing typically takes 24-48 hours.</li>
           <li>You'll receive a notification when your withdrawal is approved or rejected.</li>
