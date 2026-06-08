@@ -301,12 +301,12 @@ export default function Home() {
               Our mission is to help individuals achieve financial independence through innovative investment products, real-time portfolio tracking, and educational resources. With thousands of satisfied users and millions in successful transactions, we're committed to your financial success.
             </p>
             <div className="mt-6 flex gap-4">
-              <div className="text-center">
+              {/* <div className="text-center">
                 <div className="text-2xl font-bold text-emerald-600 sm:text-3xl">5K+</div>
                 <div className="text-xs text-slate-500 sm:text-sm">Active Users</div>
-              </div>
+              </div> */}
               <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-600 sm:text-3xl">$5M+</div>
+                <div className="text-2xl font-bold text-emerald-600 sm:text-3xl">₦1M+</div>
                 <div className="text-xs text-slate-500 sm:text-sm">Investments</div>
               </div>
               <div className="text-center">

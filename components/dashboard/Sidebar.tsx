@@ -55,7 +55,7 @@ export function Sidebar({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col overflow-hidden border-r border-slate-200 bg-white transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:sticky lg:top-0 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-screen w-60 flex-col overflow-hidden border-r border-slate-200 bg-white transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:sticky lg:top-0 lg:translate-x-0 ${
           mobileOpen
             ? 'translate-x-0'
             : '-translate-x-full lg:translate-x-0'
