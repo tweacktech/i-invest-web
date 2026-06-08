@@ -11,7 +11,7 @@ import { HistoryIcon } from 'lucide-react';
 
 const PRESETS = [6000, 15000, 51000, 120_0000, 305_000];
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/v1';
+const apiBase = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 type DepositMethod = {
   id: string;
