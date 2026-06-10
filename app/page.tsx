@@ -21,6 +21,7 @@ import {
   MapPin
 } from "lucide-react";
 import { CurrencySwitcher } from '@/components/CurrencySwitcher';
+import Image from "next/image";
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -74,8 +75,16 @@ export default function Home() {
       {/* Navbar */}
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-base font-bold text-white shadow-lg sm:h-11 sm:w-11 sm:rounded-2xl sm:text-lg">
-            I
+          
+        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-3xl shadow-lg">
+            <Image
+              src="/web-app-manifest-512x512.png"
+              alt="I-Invest Logo"
+              width={40}
+              height={40}
+              className="h-full w-full object-cover"
+              priority
+            />
           </div>
           <div>
             <h1 className="text-lg font-bold tracking-tight sm:text-xl">I-Invest</h1>
@@ -104,7 +113,7 @@ export default function Home() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <CurrencySwitcher />
+          {/* <CurrencySwitcher /> */}
           <Link
             href="/login"
             className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium transition hover:border-emerald-500 hover:text-emerald-500 dark:border-slate-700 sm:rounded-xl sm:px-4 sm:py-2 sm:text-sm"

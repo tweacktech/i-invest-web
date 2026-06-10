@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
 import { useRegister } from '@/hooks/api/useAuth';
 import { ArrowRight, Gift, Moon, Sun, TrendingUp } from 'lucide-react';
+import Image from 'next/image';
 
 export function RegisterForm() {
   const router = useRouter();
@@ -104,9 +105,17 @@ export function RegisterForm() {
         <div>
           <div className="flex items-center gap-3">
             <Link href='/'>
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-2xl font-black">
-              I
-            </div>
+           
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+            <Image
+              src="/web-app-manifest-512x512.png"
+              alt="I-Invest Logo"
+              width={44}
+              height={44}
+              className="h-full w-full object-cover"
+              priority
+            />
+          </div>
 
             <div>
               <h1 className="text-2xl font-black">I-Invest</h1>
@@ -156,9 +165,17 @@ export function RegisterForm() {
            <Link href='/'>
             <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
             
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-xl font-black text-white shadow-lg">
-              I
-            </div>
+            
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+            <Image
+              src="/web-app-manifest-512x512.png"
+              alt="I-Invest Logo"
+              width={44}
+              height={44}
+              className="h-full w-full object-cover"
+              priority
+            />
+          </div>
 
             <div>
               <h1 className="text-xl font-black tracking-tight">

@@ -200,12 +200,12 @@ export default function ProductsPage() {
               </div>
   
               {/* Bottom */}
-              <div className="mt-6 flex items-end justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
+              <div className="mt-6 flex items-end justify-between border-t border-slate-100 pt-4 dark:border-slate-800 p-2">
                 <div>
                   <p className="text-[10px] sm:text-xs text-slate-500">
                     Starting Price
                   </p>
-                  <h3 className="mt-1 text-xl sm:text-2xl lg:text-3xl font-black">
+                  <h3 className="mt-1 text-md sm:text-2xl md:text-2xl lg:text-2xl font-black">
                     {format(p.price)}
                   </h3>
                 </div>

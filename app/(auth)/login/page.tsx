@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useLogin } from '@/hooks/api/useAuth';
 import { ArrowRight, Moon, ShieldCheck, Sun, TrendingUp } from 'lucide-react';
 import { useMoney } from '@/lib/currency';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -75,9 +76,17 @@ export default function LoginPage() {
       <section className="hidden w-1/2 flex-col justify-between bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-12 text-white lg:flex">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-2xl font-black shadow-xl">
-              I
-            </div>
+           
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+            <Image
+              src="/web-app-manifest-512x512.png"
+              alt="I-Invest Logo"
+              width={44}
+              height={44}
+              className="h-full w-full object-cover"
+              priority
+            />
+          </div>
 
             <div>
             <Link href="/" >
@@ -151,9 +160,17 @@ export default function LoginPage() {
           <Link href='/'>
           <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
           
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-xl font-black text-white shadow-lg">
-              I
-            </div>
+         
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+            <Image
+              src="/web-app-manifest-512x512.png"
+              alt="I-Invest Logo"
+              width={44}
+              height={44}
+              className="h-full w-full object-cover"
+              priority
+            />
+          </div>
 
             <div>
               <h1 className="text-xl font-black tracking-tight">

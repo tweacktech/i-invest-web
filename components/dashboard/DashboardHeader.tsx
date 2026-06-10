@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/theme-provider';
 import { NotificationBell } from './NotificationBell';
 import { Moon, Sun } from 'lucide-react';
+import Image from 'next/image';
 
 type Props = {
   onMenu: () => void;
@@ -33,10 +34,16 @@ export function DashboardHeader({ onMenu, phone }: Props) {
           ☰
         </button>
         <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="flex h-6 w-6 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-xl font-black text-white shadow-lg">
-              {/* <img src="/web-app-manifest-512x512.png" /> */}
-              I
-            </div>
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+            <Image
+              src="/web-app-manifest-512x512.png"
+              alt="I-Invest Logo"
+              width={24}
+              height={24}
+              className="h-full w-full object-cover"
+              priority
+            />
+          </div>
             <div>
               <h1 className="text-md font-black tracking-tight text-slate-900 dark:text-white">
                 I-Invest

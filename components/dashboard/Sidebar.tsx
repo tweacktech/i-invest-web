@@ -6,6 +6,7 @@ import { useTheme } from '@/components/theme-provider';
 import { CurrencySwitcher } from '../CurrencySwitcher';
 import { NotificationNavLink } from './NotificationNavLink';
 import { LogOutIcon } from 'lucide-react';
+import Image from 'next/image';
 
 const nav = [
   { href: '/dashboard', label: 'Home', icon: '🏠' },
@@ -64,9 +65,16 @@ export function Sidebar({
         {/* Header */}
         <div className="shrink-0 border-b border-slate-100 px-5 py-6 dark:border-slate-800">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-xl font-black text-white shadow-lg">
-              I
-            </div>
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+            <Image
+              src="/web-app-manifest-512x512.png"
+              alt="I-Invest Logo"
+              width={24}
+              height={24}
+              className="h-full w-full object-cover"
+              priority
+            />
+          </div>
 
             <div>
               <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
