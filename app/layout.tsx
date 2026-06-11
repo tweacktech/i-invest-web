@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
@@ -17,13 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'I-Invest',
   description: "Smart investment platform",
-
   manifest: '/manifest.json',
-
   themeColor: '#111827',
-
-  viewport:
-    'width=device-width, initial-scale=1, maximum-scale=1',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
 };
 
 export default function RootLayout({
@@ -36,19 +33,24 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-      <link rel="shortcut icon" href="/favicon.ico" />
-      <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-      <link rel="manifest" href="/site.webmanifest" />
+      <head>
+        <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+      </head>
       <body className="min-h-full flex flex-col">
-   
-      <Providers>
-           <CurrencyProvider>
-        {children}
-        </CurrencyProvider>
+        <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5937965903229328"
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+        />
+        <Providers>
+          <CurrencyProvider>
+            {children}
+          </CurrencyProvider>
         </Providers>
-  
       </body>
     </html>
   );
