@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   themeColor: '#111827',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+  
 };
 
 export default function RootLayout({
@@ -34,6 +35,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
+      <meta name="google-adsense-account" content="ca-pub-5937965903229328" />
         <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="shortcut icon" href="/favicon.ico" />
