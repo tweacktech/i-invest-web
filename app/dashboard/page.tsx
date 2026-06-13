@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Wallet,
   Loader2,
+  User,
 } from 'lucide-react';
 
 import { api } from '@/lib/api-client';
@@ -149,30 +150,73 @@ export default function DashboardHomePage() {
              
             </div>
           </div>
+{/* Buttons */}
+<div className="mt-4">
+  {/* Mobile: 2x2 grid */}
+  <div className="grid grid-cols-2 gap-2 sm:hidden">
+    <Link
+      href="/dashboard/recharge"
+      className="group flex items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 py-3 text-xs font-semibold text-white shadow-xl transition hover:scale-[1.02]"
+    >
+      + Recharge
+      <ArrowUpRight className="h-3 w-2 transition group-hover:translate-x-1" />
+    </Link>
+    
+    <Link
+      href="/dashboard/products"
+      className="group flex items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 py-3 text-xs font-semibold text-white shadow-xl transition hover:scale-[1.02]"
+    >
+      + I-invest
+      <ArrowUpRight className="h-3 w-2 transition group-hover:translate-x-1" />
+    </Link>
 
-          {/* Buttons */}
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link
-              href="/dashboard/recharge"
-              className="group flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-4 text-sm font-semibold text-white shadow-xl transition hover:scale-[1.03]"
-            >
-              + Recharge
-              <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-1" />
-            </Link>
+    <Link
+      href="/dashboard/withdraw"
+      className="flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-3 py-3 text-xs font-semibold text-white backdrop-blur transition hover:bg-white/20"
+    >
+      Withdraw
+    </Link>
 
-            <Link
-              href="/dashboard/withdraw"
-              className="rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
-            >
-              Withdraw
-            </Link>
+    <Link
+      href="/dashboard/activities"
+      className="flex items-center justify-center rounded-2xl border border-white/10 bg-slate-900/40 px-3 py-3 text-xs font-semibold text-white transition hover:bg-slate-900/70"
+    >
+      Daily Tasks
+    </Link>
+  </div>
 
-            <Link
-              href="/dashboard/activities"
-              className="rounded-2xl border border-white/10 bg-slate-900/40 px-6 py-4 text-sm font-semibold text-white transition hover:bg-slate-900/70"
-            >
-              Daily Tasks
-            </Link>
+            {/* Tablet/Desktop: 4 in a row */}
+            <div className="hidden sm:flex sm:flex-wrap sm:gap-3">
+              <Link
+                href="/dashboard/recharge"
+                className="group flex flex-1 items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-4 text-sm font-semibold text-white shadow-xl transition hover:scale-[1.02]"
+              >
+                + Recharge
+                <ArrowUpRight className="h-4 w-3 transition group-hover:translate-x-1" />
+              </Link>
+              
+              <Link
+                href="/dashboard/investments"
+                className="group flex flex-1 items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-700 to-cyan-500 px-4 py-4 text-sm font-semibold text-white shadow-xl transition hover:scale-[1.02]"
+              >
+                I-invest
+                <User className="h-4 w-3 transition group-hover:translate-x-1" />
+              </Link>
+
+              <Link
+                href="/dashboard/withdraw"
+                className="flex flex-1 items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-4 py-4 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+              >
+                Withdraw
+              </Link>
+
+              <Link
+                href="/dashboard/activities"
+                className="flex flex-1 items-center justify-center rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-4 text-sm font-semibold text-white transition hover:bg-slate-900/70"
+              >
+                Daily Tasks
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -205,8 +249,8 @@ export default function DashboardHomePage() {
         ))}
       </section>
 
-      {/* QUICK LINKS */}
-      <section className="grid gap-5 lg:grid-cols-2">
+     {/* QUICK LINKS */}
+      <section className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {/* Investment */}
         <div className="rounded-[28px] border border-slate-200 bg-white/70 p-7 shadow-lg backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/60">
           <div className="flex items-center justify-between">
@@ -251,7 +295,39 @@ export default function DashboardHomePage() {
           </Link>
         </div>
 
-        {/* Activities */}
+        {/* Account Statement */}
+        <div className="rounded-[28px] border border-slate-200 bg-white/70 p-7 shadow-lg backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/60">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-black">Account Statement</h2>
+              <p className="mt-2 text-slate-500 dark:text-slate-400">
+                View your transaction history and statements.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-cyan-500/10 p-4 text-cyan-500">📊</div>
+          </div>
+
+          <div className="mt-4 rounded-xl bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 p-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Total Transactions</p>
+            <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
+              {/* {transactionsLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                transactions?.length || 0
+              )} */}
+            </p>
+          </div>
+
+          <Link
+            href="/dashboard/transactions"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold transition hover:border-cyan-500 hover:text-cyan-500 dark:border-slate-700"
+          >
+            View Statement
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {/* Daily Activities */}
         <div className="rounded-[28px] border border-slate-200 bg-white/70 p-7 shadow-lg backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/60">
           <div className="flex items-center justify-between">
             <div>

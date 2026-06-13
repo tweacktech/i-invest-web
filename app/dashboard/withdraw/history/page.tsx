@@ -1,12 +1,13 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { api } from '@/lib/api-client';
 import { useMoney } from '@/lib/currency';
 
 export default function WithdrawalHistoryPage() {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [search, setSearch] = useState('');
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
 
   const { format } = useMoney();
@@ -22,18 +23,35 @@ export default function WithdrawalHistoryPage() {
     },
   });
 
+  // Filter withdrawals based on search and status
+  const filteredData = useMemo(() => {
+    if (!withdrawals) return [];
+    
+    return withdrawals.filter((withdrawal: any) => {
+      const matchesStatus = statusFilter === 'ALL' || withdrawal.status === statusFilter;
+      
+      const matchesSearch = !search || 
+        withdrawal.amount.toString().includes(search) ||
+        withdrawal.bankAccount?.bankName?.toLowerCase().includes(search.toLowerCase()) ||
+        withdrawal.bankAccount?.accountName?.toLowerCase().includes(search.toLowerCase()) ||
+        withdrawal.bankAccount?.accountNumber?.includes(search);
+      
+      return matchesStatus && matchesSearch;
+    });
+  }, [withdrawals, statusFilter, search]);
+
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'APPROVED':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+        return 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300';
       case 'REJECTED':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+        return 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300';
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300';
       case 'PROCESSING':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-950 dark:text-gray-300';
     }
   };
 
@@ -42,13 +60,8 @@ export default function WithdrawalHistoryPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-NG', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    if (!dateString) return '—';
+    return new Date(dateString).toLocaleString();
   };
 
   if (isLoading) {
@@ -63,118 +76,73 @@ export default function WithdrawalHistoryPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Withdrawal History</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+          Withdrawal History
+        </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           View all your withdrawal requests and their status
         </p>
       </div>
 
-      {/* Filters */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setStatusFilter('ALL')}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              statusFilter === 'ALL'
-                ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-            }`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setStatusFilter('PENDING')}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              statusFilter === 'PENDING'
-                ? 'bg-yellow-600 text-white dark:bg-yellow-500'
-                : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-950/30 dark:text-yellow-400 dark:hover:bg-yellow-950/50'
-            }`}
-          >
-            Pending
-          </button>
-          <button
-            onClick={() => setStatusFilter('PROCESSING')}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              statusFilter === 'PROCESSING'
-                ? 'bg-blue-600 text-white dark:bg-blue-500'
-                : 'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50'
-            }`}
-          >
-            Processing
-          </button>
-          <button
-            onClick={() => setStatusFilter('APPROVED')}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              statusFilter === 'APPROVED'
-                ? 'bg-green-600 text-white dark:bg-green-500'
-                : 'bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50'
-            }`}
-          >
-            Approved
-          </button>
-          <button
-            onClick={() => setStatusFilter('REJECTED')}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              statusFilter === 'REJECTED'
-                ? 'bg-red-600 text-white dark:bg-red-500'
-                : 'bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50'
-            }`}
-          >
-            Rejected
-          </button>
+      {/* Filters - Matches Recharge style */}
+      <div className="mb-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 md:grid-cols-3">
+        {/* Search */}
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">
+            Search
+          </label>
+          <input
+            type="text"
+            placeholder="Search amount, bank or account..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+          />
         </div>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => setDateRange('7d')}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              dateRange === '7d'
-                ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-            }`}
+        {/* Status Filter */}
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">
+            Status
+          </label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
           >
-            Last 7 days
-          </button>
-          <button
-            onClick={() => setDateRange('30d')}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              dateRange === '30d'
-                ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-            }`}
+            <option value="ALL">All Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="PROCESSING">Processing</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
+
+        {/* Date Range Filter */}
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">
+            Date Range
+          </label>
+          <select
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value as any)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
           >
-            Last 30 days
-          </button>
-          <button
-            onClick={() => setDateRange('90d')}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              dateRange === '90d'
-                ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-            }`}
-          >
-            Last 90 days
-          </button>
-          <button
-            onClick={() => setDateRange('all')}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              dateRange === 'all'
-                ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-            }`}
-          >
-            All time
-          </button>
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="all">All time</option>
+          </select>
         </div>
       </div>
 
-      {/* Statistics Cards */}
+      {/* Statistics Cards - Optional, can remove if not needed */}
       {withdrawals && withdrawals.length > 0 && (
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
             <p className="text-sm text-slate-500 dark:text-slate-400">Total Withdrawn</p>
             <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {format(
@@ -184,9 +152,9 @@ export default function WithdrawalHistoryPage() {
               )}
             </p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-            <p className="text-sm text-slate-500 dark:text-slate-400">Pending Withdrawals</p>
-            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Pending Amount</p>
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {format(
                 withdrawals
                   .filter((w: any) => w.status === 'PENDING')
@@ -194,11 +162,11 @@ export default function WithdrawalHistoryPage() {
               )}
             </p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
             <p className="text-sm text-slate-500 dark:text-slate-400">Total Requests</p>
             <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{withdrawals.length}</p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
             <p className="text-sm text-slate-500 dark:text-slate-400">Success Rate</p>
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">
               {Math.round(
@@ -210,86 +178,84 @@ export default function WithdrawalHistoryPage() {
         </div>
       )}
 
-      {/* History Table */}
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+      {/* Table - Matching Recharge style */}
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-            <thead className="bg-slate-50 dark:bg-slate-800">
+          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+            <thead className="bg-slate-50 dark:bg-slate-950">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Bank Account
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Date Requested
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Approved Date
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white dark:divide-slate-700 dark:bg-slate-900">
-              {withdrawals && withdrawals.length > 0 ? (
-                withdrawals.map((withdrawal: any) => (
-                  <tr key={withdrawal.id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                    <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900 dark:text-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredData.length > 0 ? (
+                filteredData.map((withdrawal: any) => (
+                  <tr
+                    key={withdrawal.id}
+                    className="transition hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                  >
+                    {/* Amount */}
+                    <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
                       {format(withdrawal.amount)}
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
-                      <div>
-                        <p className="font-medium">{withdrawal.bankAccount?.bankName}</p>
-                        <p className="text-xs">
-                          {withdrawal.bankAccount?.accountName} · {withdrawal.bankAccount?.accountNumber}
-                        </p>
-                      </div>
+
+                    {/* Bank Account */}
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                      {withdrawal.bankAccount ? (
+                        <div>
+                          <p className="font-medium">{withdrawal.bankAccount.bankName}</p>
+                          <p className="text-xs text-slate-500">
+                            {withdrawal.bankAccount.accountName} · {withdrawal.bankAccount.accountNumber}
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm">
+
+                    {/* Status */}
+                    <td className="whitespace-nowrap px-6 py-4">
                       <span
-                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeClass(
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusBadgeClass(
                           withdrawal.status
                         )}`}
                       >
                         {getStatusText(withdrawal.status)}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+
+                    {/* Date Requested */}
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                       {formatDate(withdrawal.createdAt)}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
-                      {withdrawal.approvedAt ? formatDate(withdrawal.approvedAt) : '-'}
+
+                    {/* Approved Date */}
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+                      {formatDate(withdrawal.approvedAt)}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
-                    <div className="flex flex-col items-center gap-2">
-                      <svg
-                        className="h-12 w-12 text-slate-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <p>No withdrawal requests found</p>
-                      <a
-                        href="/dashboard/withdraw"
-                        className="mt-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 dark:bg-slate-200 dark:text-slate-900 dark:hover:bg-white"
-                      >
-                        Make a withdrawal
-                      </a>
-                    </div>
+                  <td
+                    colSpan={5}
+                    className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400"
+                  >
+                    No withdrawal history found.
                   </td>
                 </tr>
               )}
@@ -297,44 +263,6 @@ export default function WithdrawalHistoryPage() {
           </table>
         </div>
       </div>
-
-      {/* Export Button */}
-      {withdrawals && withdrawals.length > 0 && (
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={() => {
-              // Implement CSV export functionality
-              const csv = convertToCSV(withdrawals);
-              const blob = new Blob([csv], { type: 'text/csv' });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `withdrawals_${new Date().toISOString()}.csv`;
-              a.click();
-            }}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            Export to CSV
-          </button>
-        </div>
-      )}
     </div>
   );
-}
-
-function convertToCSV(withdrawals: any[]) {
-  const headers = ['ID', 'Amount', 'Status', 'Bank Name', 'Account Name', 'Account Number', 'Created At', 'Approved At'];
-  const rows = withdrawals.map(w => [
-    w.id,
-    w.amount,
-    w.status,
-    w.bankAccount?.bankName || '',
-    w.bankAccount?.accountName || '',
-    w.bankAccount?.accountNumber || '',
-    new Date(w.createdAt).toLocaleString(),
-    w.approvedAt ? new Date(w.approvedAt).toLocaleString() : ''
-  ]);
-  
-  const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
-  return csvContent;
 }

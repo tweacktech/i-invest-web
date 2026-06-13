@@ -88,9 +88,9 @@ const { format } = useMoney();
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
           >
             <option value="ALL">All Status</option>
-            <option value="SUCCESS">Success</option>
-            <option value="PENDING">Pending</option>
-            <option value="FAILED">Failed</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="REJECTED">REJECTED</option>
+            <option value="EXPIRED">EXPIRED</option>
           </select>
         </div>
 
@@ -107,9 +107,9 @@ const { format } = useMoney();
           >
             <option value="ALL">All Channels</option>
             <option value="MANUAL">Manual</option>
-            <option value="GATEWAY_A">Gateway A</option>
+            {/* <option value="GATEWAY_A">Gateway A</option>
             <option value="GATEWAY_B">Gateway B</option>
-            <option value="GATEWAY_D">Gateway D</option>
+            <option value="GATEWAY_D">Gateway D</option> */}
           </select>
         </div>
       </div>
