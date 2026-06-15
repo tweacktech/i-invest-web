@@ -12,7 +12,7 @@ const nav = [
   { href: '/dashboard', label: 'Home', icon: '🏠' },
   { href: '/dashboard/products', label: 'Products', icon: '📦' },
   { href: '/dashboard/recharge', label: 'Recharge', icon: '💳' },
-  { href: '/dashboard/investments', label: 'My Investments', icon: '📈' },
+  { href: '/dashboard/investments', label: 'My I-Invest', icon: '📈' },
   // { href: '/dashboard/welfare', label: 'Welfare', icon: '🛡️' },
   { href: '/dashboard/team', label: 'My Team', icon: '👥' },
   // { href: '/dashboard/notifications', label: 'Notifications', icon: '🔔', badge: true },
