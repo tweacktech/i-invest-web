@@ -67,7 +67,7 @@ function Field({
   );
 }
 
-const inputCls ='w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-blue-900';
+const inputCls = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-blue-900';
 
 // ── Toggle Switch ─────────────────────────────────────────────────────────────
 function Toggle({
@@ -124,9 +124,9 @@ function MethodModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
           <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
             {initial.id ? 'Edit Deposit Method' : 'Add Deposit Method'}
           </h2>
@@ -141,7 +141,7 @@ function MethodModal({
 
         {/* Body */}
         <div className="space-y-4 px-6 py-5">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Code" required>
               <input
                 value={form.code}
@@ -169,7 +169,7 @@ function MethodModal({
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Account Name" required>
               <input
                 value={form.accountName}
@@ -188,7 +188,7 @@ function MethodModal({
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Sort Order">
               <input
                 type="number"
@@ -213,7 +213,7 @@ function MethodModal({
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 border-t border-slate-100 px-6 py-4 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row gap-3 border-t border-slate-100 px-6 py-4 dark:border-slate-800 sticky bottom-0 bg-white dark:bg-slate-900">
           <button
             type="button"
             onClick={onClose}
@@ -225,14 +225,16 @@ function MethodModal({
             type="button"
             disabled={saving || !isValid}
             onClick={() => onSave(form)}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 py-2.5 text-sm font-semibold text-white disabled:opacity-50 hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900"
+            className="flex-1 rounded-xl bg-slate-900 py-2.5 text-sm font-semibold text-white disabled:opacity-50 hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900"
           >
             {saving ? (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-slate-900 dark:border-t-transparent" />
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-slate-900 dark:border-t-transparent" />
             ) : (
-              <CheckIcon className="h-4 w-4" />
+              <span className="inline-flex items-center gap-2">
+                <CheckIcon className="h-4 w-4" />
+                {initial.id ? 'Save Changes' : 'Add Method'}
+              </span>
             )}
-            {initial.id ? 'Save Changes' : 'Add Method'}
           </button>
         </div>
       </div>
@@ -244,9 +246,9 @@ function MethodModal({
 export default function DepositMethodsPage() {
   const qc = useQueryClient();
   const [modal, setModal] = useState<FormState | null>(null);
-  // Optimistic toggle state: track which ids are mid-flight
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
 
+  // FIXED: Updated API path to match backend
   const methods = useQuery({
     queryKey: ['deposit-methods'],
     queryFn: async () => (await adminApi.get<DepositMethod[]>('/staff/deposit-methods')).data,
@@ -269,14 +271,17 @@ export default function DepositMethodsPage() {
         ? adminApi.patch(`/staff/deposit-methods/${data.id}`, payload)
         : adminApi.post('/staff/deposit-methods', payload);
     },
-    onSuccess: () => { invalidate(); setModal(null); toast.success('Saved.'); },
+    onSuccess: () => { 
+      invalidate(); 
+      setModal(null); 
+      toast.success('Deposit method saved successfully!');
+    },
     onError: toastApiError,
   });
 
   const toggle = useMutation({
     mutationFn: async (id: string) => {
       setTogglingIds((s) => new Set(s).add(id));
-      // Optimistic update in cache
       qc.setQueryData<DepositMethod[]>(['deposit-methods'], (old) =>
         old?.map((m) => (m.id === id ? { ...m, isEnabled: !m.isEnabled } : m)),
       );
@@ -284,10 +289,9 @@ export default function DepositMethodsPage() {
     },
     onSettled: (_, __, id) => {
       setTogglingIds((s) => { const n = new Set(s); n.delete(id); return n; });
-      invalidate(); // sync with server truth
+      invalidate();
     },
     onError: (err, id) => {
-      // Roll back optimistic update on error
       qc.setQueryData<DepositMethod[]>(['deposit-methods'], (old) =>
         old?.map((m) => (m.id === id ? { ...m, isEnabled: !m.isEnabled } : m)),
       );
@@ -297,7 +301,10 @@ export default function DepositMethodsPage() {
 
   const remove = useMutation({
     mutationFn: (id: string) => adminApi.delete(`/staff/deposit-methods/${id}`),
-    onSuccess: () => { invalidate(); toast.success('Deleted.'); },
+    onSuccess: () => { 
+      invalidate(); 
+      toast.success('Deposit method deleted successfully!');
+    },
     onError: toastApiError,
   });
 
@@ -323,9 +330,9 @@ export default function DepositMethodsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between gap-4">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100">
             <BanknoteIcon className="h-5 w-5 text-white dark:text-slate-900" />
           </div>
           <div>
@@ -339,14 +346,14 @@ export default function DepositMethodsPage() {
         <button
           type="button"
           onClick={() => setModal({ ...EMPTY_FORM, sortOrder: sorted.length })}
-          className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900"
+          className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900"
         >
           <PlusIcon className="h-4 w-4" />
           Add Method
         </button>
       </div>
 
-      {/* List */}
+      {/* List - Responsive Card Layout for Mobile */}
       {methods.isLoading ? (
         <div className="flex h-40 items-center justify-center">
           <span className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
@@ -357,110 +364,213 @@ export default function DepositMethodsPage() {
           <p className="text-sm">No deposit methods yet.</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-          {/* Header row */}
-          <div className="grid grid-cols-[2rem_1fr_1fr_1fr_7rem_7rem] gap-4 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800/50">
-            <span>#</span>
-            <span>Label / Code</span>
-            <span>Bank</span>
-            <span>Account</span>
-            <span className="text-center">Enabled</span>
-            <span className="text-right">Actions</span>
+        <>
+          {/* Desktop Table View - Hidden on mobile */}
+          <div className="hidden md:block overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
+            <div className="grid grid-cols-[2rem_1fr_1fr_1fr_7rem_7rem] gap-4 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800/50">
+              <span>#</span>
+              <span>Label / Code</span>
+              <span>Bank</span>
+              <span>Account</span>
+              <span className="text-center">Enabled</span>
+              <span className="text-right">Actions</span>
+            </div>
+
+            {sorted.map((m, idx) => (
+              <div
+                key={m.id}
+                className={`grid grid-cols-[2rem_1fr_1fr_1fr_7rem_7rem] items-center gap-4 px-4 py-4 text-sm transition-colors ${
+                  idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-800/30'
+                }`}
+              >
+                {/* Order controls */}
+                <div className="flex flex-col items-center gap-0.5">
+                  <button
+                    type="button"
+                    disabled={idx === 0 || moveOrder.isPending}
+                    onClick={() => moveOrder.mutate({ id: m.id, direction: 'up' })}
+                    className="rounded p-0.5 text-slate-300 hover:text-slate-600 disabled:opacity-20 dark:text-slate-600 dark:hover:text-slate-300"
+                  >
+                    <ChevronUpIcon className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="text-xs text-slate-400">{idx + 1}</span>
+                  <button
+                    type="button"
+                    disabled={idx === sorted.length - 1 || moveOrder.isPending}
+                    onClick={() => moveOrder.mutate({ id: m.id, direction: 'down' })}
+                    className="rounded p-0.5 text-slate-300 hover:text-slate-600 disabled:opacity-20 dark:text-slate-600 dark:hover:text-slate-300"
+                  >
+                    <ChevronDownIcon className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {/* Label + Code */}
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">{m.label}</p>
+                  <span className="mt-0.5 inline-block rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                    {m.code}
+                  </span>
+                </div>
+
+                {/* Bank */}
+                <p className="text-slate-700 dark:text-slate-300">{m.bankName}</p>
+
+                {/* Account */}
+                <div>
+                  <p className="text-slate-800 dark:text-slate-200">{m.accountName}</p>
+                  <p className="font-mono text-xs text-slate-500 dark:text-slate-400">{m.accountNumber}</p>
+                </div>
+
+                {/* Toggle */}
+                <div className="flex flex-col items-center gap-1">
+                  <Toggle
+                    enabled={m.isEnabled}
+                    onChange={() => toggle.mutate(m.id)}
+                    disabled={togglingIds.has(m.id)}
+                  />
+                  <span className={`text-xs font-medium ${m.isEnabled ? 'text-green-600 dark:text-green-400' : 'text-slate-400'}`}>
+                    {m.isEnabled ? 'On' : 'Off'}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setModal({
+                        id: m.id,
+                        code: m.code,
+                        label: m.label,
+                        bankName: m.bankName,
+                        accountName: m.accountName,
+                        accountNumber: m.accountNumber,
+                        isEnabled: m.isEnabled,
+                        sortOrder: m.sortOrder,
+                      })
+                    }
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`Delete "${m.label}"?`)) {
+                        remove.mutate(m.id);
+                      }
+                    }}
+                    disabled={remove.isPending}
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
 
-          {sorted.map((m, idx) => (
-            <div
-              key={m.id}
-              className={`grid grid-cols-[2rem_1fr_1fr_1fr_7rem_7rem] items-center gap-4 px-4 py-4 text-sm transition-colors ${
-                idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-800/30'
-              }`}
-            >
-              {/* Order controls */}
-              <div className="flex flex-col items-center gap-0.5">
-                <button
-                  type="button"
-                  disabled={idx === 0 || moveOrder.isPending}
-                  onClick={() => moveOrder.mutate({ id: m.id, direction: 'up' })}
-                  className="rounded p-0.5 text-slate-300 hover:text-slate-600 disabled:opacity-20 dark:text-slate-600 dark:hover:text-slate-300"
-                >
-                  <ChevronUpIcon className="h-3.5 w-3.5" />
-                </button>
-                <span className="text-xs text-slate-400">{idx + 1}</span>
-                <button
-                  type="button"
-                  disabled={idx === sorted.length - 1 || moveOrder.isPending}
-                  onClick={() => moveOrder.mutate({ id: m.id, direction: 'down' })}
-                  className="rounded p-0.5 text-slate-300 hover:text-slate-600 disabled:opacity-20 dark:text-slate-600 dark:hover:text-slate-300"
-                >
-                  <ChevronDownIcon className="h-3.5 w-3.5" />
-                </button>
-              </div>
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {sorted.map((m, idx) => (
+              <div
+                key={m.id}
+                className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-slate-900 dark:text-slate-100">{m.label}</h3>
+                    <span className="mt-0.5 inline-block rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                      {m.code}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Toggle
+                      enabled={m.isEnabled}
+                      onChange={() => toggle.mutate(m.id)}
+                      disabled={togglingIds.has(m.id)}
+                    />
+                    <span className={`text-xs font-medium ${m.isEnabled ? 'text-green-600 dark:text-green-400' : 'text-slate-400'}`}>
+                      {m.isEnabled ? 'On' : 'Off'}
+                    </span>
+                  </div>
+                </div>
 
-              {/* Label + Code */}
-              <div>
-                <p className="font-semibold text-slate-900 dark:text-slate-100">{m.label}</p>
-                <span className="mt-0.5 inline-block rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                  {m.code}
-                </span>
-              </div>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="text-slate-500 dark:text-slate-400">Bank:</span>
+                    <span className="ml-2 text-slate-900 dark:text-slate-100">{m.bankName}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 dark:text-slate-400">Account:</span>
+                    <span className="ml-2 text-slate-900 dark:text-slate-100">{m.accountName}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 dark:text-slate-400">Number:</span>
+                    <span className="ml-2 font-mono text-slate-900 dark:text-slate-100">{m.accountNumber}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <span>Order: {m.sortOrder}</span>
+                    <span>•</span>
+                    <span>#{idx + 1}</span>
+                  </div>
+                </div>
 
-              {/* Bank */}
-              <p className="text-slate-700 dark:text-slate-300">{m.bankName}</p>
-
-              {/* Account */}
-              <div>
-                <p className="text-slate-800 dark:text-slate-200">{m.accountName}</p>
-                <p className="font-mono text-xs text-slate-500 dark:text-slate-400">{m.accountNumber}</p>
-              </div>
-
-              {/* Toggle */}
-              <div className="flex flex-col items-center gap-1">
-                <Toggle
-                  enabled={m.isEnabled}
-                  onChange={() => toggle.mutate(m.id)}
-                  disabled={togglingIds.has(m.id)}
-                />
-                <span className={`text-xs font-medium ${m.isEnabled ? 'text-green-600 dark:text-green-400' : 'text-slate-400'}`}>
-                  {m.isEnabled ? 'On' : 'Off'}
-                </span>
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-end gap-1">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setModal({
-                      id: m.id,
-                      code: m.code,
-                      label: m.label,
-                      bankName: m.bankName,
-                      accountName: m.accountName,
-                      accountNumber: m.accountNumber,
-                      isEnabled: m.isEnabled,
-                      sortOrder: m.sortOrder,
-                    })
-                  }
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                >
-                  <PencilIcon className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (confirm(`Delete "${m.label}"?\n\nThis will fail if any recharge requests reference it.`)) {
-                      remove.mutate(m.id);
+                <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={idx === 0 || moveOrder.isPending}
+                      onClick={() => moveOrder.mutate({ id: m.id, direction: 'up' })}
+                      className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-20 dark:hover:bg-slate-800"
+                    >
+                      <ChevronUpIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={idx === sorted.length - 1 || moveOrder.isPending}
+                      onClick={() => moveOrder.mutate({ id: m.id, direction: 'down' })}
+                      className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-20 dark:hover:bg-slate-800"
+                    >
+                      <ChevronDownIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex-1" />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setModal({
+                        id: m.id,
+                        code: m.code,
+                        label: m.label,
+                        bankName: m.bankName,
+                        accountName: m.accountName,
+                        accountNumber: m.accountNumber,
+                        isEnabled: m.isEnabled,
+                        sortOrder: m.sortOrder,
+                      })
                     }
-                  }}
-                  disabled={remove.isPending}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </button>
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`Delete "${m.label}"?`)) {
+                        remove.mutate(m.id);
+                      }
+                    }}
+                    disabled={remove.isPending}
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Modal */}
