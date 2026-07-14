@@ -45,6 +45,7 @@ export default function RootLayout({
           strategy="afterInteractive"
           crossOrigin="anonymous"
         />
+        <meta name="google-site-verification" content="aHi7l0T5RCaDl6eh39T6YnCV6zRCXqWUemn5Up4B088" />
       </head>
       <body className="min-h-full flex flex-col">
         
